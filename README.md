@@ -1,13 +1,64 @@
-## Evaluation & Ablation Study
+# Ablation Study of Retrieval Strategies for Stock-News RAG Systems
 
-We evaluated three retrieval strategies—semantic retrieval, hybrid retrieval, and hybrid retrieval with MMR re-ranking—on a fixed stock news dataset. Each method was assessed using Gemini-based automatic evaluation across three criteria: retrieval relevance, grounding, and coverage (0–2 scale).
+This repository contains the code and experimental setup for a research-style ablation study on Retrieval-Augmented Generation (RAG) systems applied to stock-news question answering.
 
-Hybrid retrieval consistently improved coverage compared to semantic retrieval, indicating higher recall of diverse market factors. However, redundancy was observed, with multiple retrieved documents often covering the same event.
+The project investigates how different retrieval strategies affect answer quality, with a particular focus on coverage, grounding, and retrieval relevance.
 
-Applying MMR re-ranking further improved coverage scores without degrading grounding, suggesting that diversity-aware retrieval helps surface complementary information relevant to stock analysis.
+---
 
-While hybrid retrieval improved recall, it did not eliminate hallucinations in generated answers. This highlights that retrieval diversity alone is insufficient for grounding; strict prompt constraints and evaluation-aware generation remain necessary.
+## 🔍 Research Motivation
 
-MMR re-ranking improved contextual diversity but did not significantly alter grounding scores, indicating that hallucination is more sensitive to prompt discipline than retrieval strategy.
+Large Language Models (LLMs) often hallucinate or provide incomplete answers when queried about real-world information. Retrieval-Augmented Generation (RAG) mitigates this issue by conditioning generation on external documents.
 
-Additionally, free-tier API constraints influenced experimental design, necessitating reduced evaluation runs and rate limiting. This reflects real-world limitations often overlooked in prototype RAG systems.
+However, retrieval itself remains a major failure mode. In particular:
+- Semantic retrieval may miss exact facts
+- Hybrid retrieval improves recall but introduces redundancy
+- Increased recall does not guarantee grounded answers
+
+This project empirically studies these trade-offs.
+
+---
+
+## 🧪 Experimental Setup
+
+### Retrieval Strategies Compared
+- **Semantic Retrieval**: Sentence embeddings and cosine similarity
+- **Hybrid Retrieval**: Semantic similarity combined with BM25 keyword scoring
+- **Hybrid + MMR**: Hybrid retrieval followed by Maximum Marginal Relevance (MMR) re-ranking for diversity
+
+### Generation
+- Gemini (2.5 Flash)
+- Strict context-only prompting
+- Temperature set to 0 for determinism
+
+### Evaluation
+- Automatic evaluation using an LLM-as-a-judge
+- Metrics (0–2 scale):
+  - Retrieval Relevance
+  - Grounding
+  - Coverage
+
+---
+
+## 📊 Key Findings
+
+- Hybrid retrieval improves coverage compared to semantic retrieval
+- MMR further increases contextual diversity and coverage
+- Grounding scores remain largely unchanged across retrieval strategies
+- Retrieval diversity alone does not eliminate hallucinations
+
+These results indicate that retrieval optimization and grounding enforcement are complementary but distinct problems.
+
+---
+
+## 📁 Repository Structure
+
+```text
+.
+├── retrieval.py          # Semantic, hybrid, and MMR-based retrieval
+├── generate.py           # Gemini-based generation
+├── auto_eval.py          # LLM-as-a-judge evaluation
+├── ablation.py           # Ablation experiment runner
+├── dataset_snapshot.json # Frozen dataset for reproducibility
+├── paper.pdf             # Research paper (compiled)
+└── README.md
